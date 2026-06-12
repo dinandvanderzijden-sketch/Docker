@@ -1,0 +1,57 @@
+services:
+  pcapng-analyzer:
+    build: .
+    container_name: pcapng_analyzer
+    network_mode: host 
+    volumes:
+      - /var/log/alerts:/var/log 
+    environment:
+      - DB_HOST=127.0.0.1 
+      - DB_PORT=5432
+      - DB_NAME=sniffer_db
+      - DB_USER=sniffer_admin
+      - DB_PASSWORD=P@ssword1
+    depends_on:
+      - sniffer-db
+    restart: always
+
+  
+  sniffer-db:
+    image: postgres:15-alpine
+    container_name: sniffer_db
+    ports:
+      - "5432:5432" 
+    environment:
+      POSTGRES_DB: sniffer_db
+      POSTGRES_USER: sniffer_admin
+      POSTGRES_PASSWORD: P@ssword1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sniffer_internal
+    restart: always
+
+
+  db-backup:
+    image: prodrigestivill/postgres-backup-local:15-alpine
+    container_name: db_backup
+    environment:
+      POSTGRES_HOST: sniffer-db 
+      POSTGRES_DB: sniffer_db
+      POSTGRES_USER: sniffer_admin
+      POSTGRES_PASSWORD: VeiligWachtwoord123
+      SCHEDULE: '@every 1h' 
+      BACKUP_KEEP_DAYS: 7 
+      POSTGRES_EXTRA_OPTS: '-Z6' 
+      - ./db_backups:/backup 
+    depends_on:
+      - sniffer-db
+    networks:
+      - sniffer_internal
+    restart: always
+
+volumes:
+  postgres_data: 
+
+networks:
+  sniffer_internal: 
