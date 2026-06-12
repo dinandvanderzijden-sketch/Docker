@@ -43,6 +43,7 @@ services:
       SCHEDULE: '@every 1h' 
       BACKUP_KEEP_DAYS: 7 
       POSTGRES_EXTRA_OPTS: '-Z6' 
+    volumes:
       - ./db_backups:/backup 
     depends_on:
       - sniffer-db
