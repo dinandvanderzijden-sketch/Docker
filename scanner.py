@@ -142,4 +142,4 @@ if __name__ == "__main__":
     print(f"[+] Status Leermodus (LEARNING_MODE) = {LEARNING_MODE}")
     print(f"[+] Sniffer luistert nu passief op interface: {INTERFACE}")
     
-    sniff(iface=INTERFACE, prn=packet_callback, store=0)
+    sniff(iface=INTERFACE, filter="arp", prn=packet_callback, store=0)

@@ -14,7 +14,8 @@ services:
       - DB_USER=sniffer_admin
       - DB_PASSWORD=P@ssword1
     depends_on:
-      - sniffer-db
+      sniffer-db:
+        condition: service_healthy
     restart: always
 
   
@@ -32,7 +33,11 @@ services:
     networks:
       - sniffer_internal
     restart: always
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sniffer_admin -d sniffer_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db-backup:
     image: prodrigestivill/postgres-backup-local:15-alpine
@@ -41,7 +46,7 @@ services:
       POSTGRES_HOST: sniffer-db 
       POSTGRES_DB: sniffer_db
       POSTGRES_USER: sniffer_admin
-      POSTGRES_PASSWORD: VeiligWachtwoord123
+      POSTGRES_PASSWORD: P@ssword1
       SCHEDULE: '@every 1h' 
       BACKUP_KEEP_DAYS: 7 
       POSTGRES_EXTRA_OPTS: '-Z6' 
