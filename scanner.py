@@ -128,14 +128,10 @@ def log_incident(mac, ip, issue):
         print(f"[-] Kon niet schrijven naar alerts.log: {e}")
 
 def packet_callback(packet):
+
     if packet.haslayer(ARP) and packet[ARP].op == 2:  
         src_mac = packet[ARP].hwsrc
         src_ip = packet[ARP].psrc
-        check_mac_baseline(src_mac, src_ip)
-        
-    elif packet.haslayer(IP):
-        src_mac = packet.src
-        src_ip = packet[IP].src
         check_mac_baseline(src_mac, src_ip)
 
 if __name__ == "__main__":
