@@ -9,7 +9,7 @@ DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_NAME = os.getenv("DB_NAME", "sniffer_db")
 DB_USER = os.getenv("DB_USER", "sniffer_admin")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "P@ssword1")
-INTERFACE = "eth1"  
+INTERFACE = "ens3"  
 
 def get_db_connection():
     
