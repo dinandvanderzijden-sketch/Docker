@@ -12,7 +12,8 @@ services:
       - DB_PORT=5432
       - DB_NAME=sniffer_db
       - DB_USER=sniffer_admin
-      - DB_PASSWORD_FILE=/run/student/Knowledge-Hub-Sniffer/db_password
+      # Aangepast naar het interne Docker secrets pad:
+      - DB_PASSWORD_FILE=/run/secrets/db_password
     depends_on:
       sniffer-db:
         condition: service_healthy
@@ -20,7 +21,6 @@ services:
       - db_password
     restart: always
 
-  
   sniffer-db:
     image: postgres:15-alpine
     container_name: sniffer_db
@@ -29,7 +29,8 @@ services:
     environment:
       POSTGRES_DB: sniffer_db
       POSTGRES_USER: sniffer_admin
-      POSTGRES_PASSWORD_FILE: /run/student/Knowledge-Hub-Sniffer/db_password
+      # Gecorrigeerd: Postgres zoekt nu op de juiste plek in de container
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -50,7 +51,8 @@ services:
       POSTGRES_HOST: sniffer-db 
       POSTGRES_DB: sniffer_db
       POSTGRES_USER: sniffer_admin
-      POSTGRES_PASSWORD_FILE: /run/student/Knowledge-Hub-Sniffer/db_password
+      # Gecorrigeerd: Ook de backup tool kijkt nu in de container
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       SCHEDULE: '@every 1h' 
       BACKUP_KEEP_DAYS: 7 
       POSTGRES_EXTRA_OPTS: '-Z6' 
@@ -72,4 +74,4 @@ volumes:
   postgres_data: 
 
 networks:
-  sniffer_internal: 
+  sniffer_internal:
