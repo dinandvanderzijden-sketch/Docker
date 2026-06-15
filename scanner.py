@@ -135,7 +135,7 @@ def packet_callback(packet):
         check_mac_baseline(src_mac, src_ip)
 
 if __name__ == "__main__":
-    print("[+] Passive Network Sniffer wordt opgestart...")
+    print("[+] Passive Network Sniffer v1.1 wordt opgestart...")
     
     init_database()
     
