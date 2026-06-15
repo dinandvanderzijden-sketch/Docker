@@ -4,17 +4,17 @@ import time
 from scapy.all import sniff, ARP, IP
 import psycopg2
 
-# Database configuratie via omgevingsvariabelen
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")  
 DB_NAME = os.getenv("DB_NAME", "sniffer_db")
 DB_USER = os.getenv("DB_USER", "sniffer_admin")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "P@ssword1")
+DB_PASSWORD_FILE = os.getenv("DB_PASSWORD_FILE", "/run/student/Knowledge-Hub-Sniffer/db_password")
 
-# HIER JE INTERFACE INSTANTIËREN (Zorg dat deze matcht met je 'ip a' output!)
+if os.path.exists(DB_PASSWORD_FILE):
+    with open(DB_PASSWORD_FILE, 'r') as f:
+        DB_PASSWORD = f.read().strip()
+
 INTERFACE = os.getenv("SNIFFER_INTERFACE", "ens3")  
 
-# LEERMODUS: Als dit True is, vult hij de database automatisch. 
-# Als dit False is, gaat hij actief waarschuwen (IDS-modus).
 LEARNING_MODE = os.getenv("LEARNING_MODE", "True").lower() == "true"
 
 def get_db_connection():
@@ -23,7 +23,7 @@ def get_db_connection():
             host=DB_HOST,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD,
+            password=DB_PASSWORD_FILE,
             connect_timeout=3
         )
     except psycopg2.OperationalError as e:
@@ -38,7 +38,6 @@ def init_database():
         
     cursor = conn.cursor()
     
-    # Tabel voor de vertrouwde apparaten
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS network_baseline (
             mac_address VARCHAR(17) PRIMARY KEY,

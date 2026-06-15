@@ -12,10 +12,12 @@ services:
       - DB_PORT=5432
       - DB_NAME=sniffer_db
       - DB_USER=sniffer_admin
-      - DB_PASSWORD=P@ssword1
+      - DB_PASSWORD_FILE=/run/student/Knowledge-Hub-Sniffer/db_password
     depends_on:
       sniffer-db:
         condition: service_healthy
+    secrets:
+      - db_password
     restart: always
 
   
@@ -27,11 +29,13 @@ services:
     environment:
       POSTGRES_DB: sniffer_db
       POSTGRES_USER: sniffer_admin
-      POSTGRES_PASSWORD: P@ssword1
+      POSTGRES_PASSWORD_FILE: /run/student/Knowledge-Hub-Sniffer/db_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - sniffer_internal
+    secrets:
+      - db_password
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sniffer_admin -d sniffer_db"]
@@ -46,7 +50,7 @@ services:
       POSTGRES_HOST: sniffer-db 
       POSTGRES_DB: sniffer_db
       POSTGRES_USER: sniffer_admin
-      POSTGRES_PASSWORD: P@ssword1
+      POSTGRES_PASSWORD_FILE: /run/student/Knowledge-Hub-Sniffer/db_password
       SCHEDULE: '@every 1h' 
       BACKUP_KEEP_DAYS: 7 
       POSTGRES_EXTRA_OPTS: '-Z6' 
@@ -56,8 +60,14 @@ services:
       - sniffer-db
     networks:
       - sniffer_internal
+    secrets:
+      - db_password
     restart: always
 
+secrets:
+  db_password:
+    file: ./db_password.txt
+    
 volumes:
   postgres_data: 
 
