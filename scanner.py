@@ -8,13 +8,12 @@ DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_NAME = os.getenv("DB_NAME", "sniffer_db")
 DB_USER = os.getenv("DB_USER", "sniffer_admin")
 
-# We zetten het standaardpad alvast naar de Docker-standaard (/run/secrets/...)
+
 DB_PASSWORD_FILE = os.getenv("DB_PASSWORD_FILE", "/run/secrets/db_password")
 
-# Haal eventueel een standaard tekst-wachtwoord op als fallback
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
-# Als het secret-bestand bestaat, overschrijven we DB_PASSWORD met de inhoud ervan
+
 if os.path.exists(DB_PASSWORD_FILE):
     with open(DB_PASSWORD_FILE, 'r') as f:
         DB_PASSWORD = f.read().strip()
@@ -28,7 +27,7 @@ def get_db_connection():
             host=DB_HOST,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD,  # <-- GECORRIGEERD: gebruikt nu de ingelezen tekst!
+            password=DB_PASSWORD,
             connect_timeout=3
         )
     except psycopg2.OperationalError as e:
