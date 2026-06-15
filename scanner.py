@@ -7,14 +7,19 @@ import psycopg2
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")  
 DB_NAME = os.getenv("DB_NAME", "sniffer_db")
 DB_USER = os.getenv("DB_USER", "sniffer_admin")
-DB_PASSWORD_FILE = os.getenv("DB_PASSWORD_FILE", "/run/student/Knowledge-Hub-Sniffer/db_password")
 
+# We zetten het standaardpad alvast naar de Docker-standaard (/run/secrets/...)
+DB_PASSWORD_FILE = os.getenv("DB_PASSWORD_FILE", "/run/secrets/db_password")
+
+# Haal eventueel een standaard tekst-wachtwoord op als fallback
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+
+# Als het secret-bestand bestaat, overschrijven we DB_PASSWORD met de inhoud ervan
 if os.path.exists(DB_PASSWORD_FILE):
     with open(DB_PASSWORD_FILE, 'r') as f:
         DB_PASSWORD = f.read().strip()
 
 INTERFACE = os.getenv("SNIFFER_INTERFACE", "ens3")  
-
 LEARNING_MODE = os.getenv("LEARNING_MODE", "True").lower() == "true"
 
 def get_db_connection():
@@ -23,7 +28,7 @@ def get_db_connection():
             host=DB_HOST,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD_FILE,
+            password=DB_PASSWORD,  # <-- GECORRIGEERD: gebruikt nu de ingelezen tekst!
             connect_timeout=3
         )
     except psycopg2.OperationalError as e:
@@ -47,7 +52,6 @@ def init_database():
         );
     """)
     
-    # Tabel voor de incidenten/alerts
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS incidents (
             id SERIAL PRIMARY KEY,
@@ -64,7 +68,6 @@ def init_database():
     print("[+] Database succesvol geïnitialiseerd en tabellen gecontroleerd.")
 
 def add_to_baseline(mac, ip):
-    """Voegt een nieuw ontdekt apparaat automatisch toe aan de veilige baseline."""
     print(f"[+] [LEERMODUS] Nieuw apparaat ontdekt! Toevoegen aan baseline: MAC={mac} | IP={ip}")
     conn = get_db_connection()
     if conn:
@@ -82,7 +85,6 @@ def add_to_baseline(mac, ip):
         conn.close()
 
 def check_mac_baseline(mac, ip):
-    """Controleert of een MAC-IP combinatie klopt volgens de database baseline."""
     conn = get_db_connection()
     if not conn:
         return  
@@ -92,15 +94,11 @@ def check_mac_baseline(mac, ip):
     result = cursor.fetchone()
     
     if result is None:
-        # Apparaat is onbekend!
         if LEARNING_MODE:
-            # In leermodus voegen we hem stilletjes toe
             add_to_baseline(mac, ip)
         else:
-            # In actieve modus slaan we direct alarm
             log_incident(mac, ip, "Rogue Device Detected (Onbekend apparaat in netwerk)")
     elif result[0] != ip: 
-        # MAC-adres bestaat, maar heeft nu ineens een ander IP (Mogelijke spoofing aanval!)
         log_incident(mac, ip, f"MAC Spoofing gedetecteerd! Verwachtte IP: {result[0]}")
         
     cursor.close()
@@ -127,7 +125,6 @@ def log_incident(mac, ip, issue):
         print(f"[-] Kon niet schrijven naar alerts.log: {e}")
 
 def packet_callback(packet):
-
     if packet.haslayer(ARP) and packet[ARP].op == 2:  
         src_mac = packet[ARP].hwsrc
         src_ip = packet[ARP].psrc
