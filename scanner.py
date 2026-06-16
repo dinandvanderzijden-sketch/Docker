@@ -8,7 +8,7 @@ DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_NAME = os.getenv("DB_NAME", "sniffer_db")
 DB_USER = os.getenv("DB_USER", "sniffer_admin")
 
-#testing testing
+
 DB_PASSWORD_FILE = os.getenv("DB_PASSWORD_FILE", "/run/secrets/db_password")
 
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
