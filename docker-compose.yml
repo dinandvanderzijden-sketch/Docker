@@ -41,7 +41,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-db-backup:
+
+  db-backup:
     image: jkaninda/pg-bkup:latest
     container_name: db_backup
     
