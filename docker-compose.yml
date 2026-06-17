@@ -45,21 +45,19 @@ services:
   db-backup:
     image: jkaninda/pg-bkup:latest
     container_name: db_backup
-    
-    command: >
-      /bin/sh -c "
-      export DB_PASSWORD=$$(cat /run/secrets/db_password) &&
-      export GPG_PASSPHRASE=$$(cat /run/secrets/gpg_passphrase) &&
-      exec backup -d sniffer_db --cron-expression '@every 1h'
-      "
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        export DB_PASSWORD=$$(cat /run/secrets/db_password)
+        export GPG_PASSPHRASE=$$(cat /run/secrets/gpg_passphrase)
+        exec pg-bkup backup -d sniffer_db --cron-expression '@every 1h'
     environment:
       DB_HOST: sniffer-db
       DB_PORT: 5432
       DB_USERNAME: sniffer_admin
       BACKUP_RETENTION_DAYS: 7
-      BACKUP_ON_START: 'TRUE'
     volumes:
-      - ./db_backups:/backups
+      - ./db_backups:/backup
     depends_on:
       sniffer-db:
         condition: service_healthy
@@ -67,7 +65,7 @@ services:
       - sniffer_internal
     secrets:
       - db_password
-      - gpg_passphrase 
+      - gpg_passphrase
     restart: always
 
 secrets:
