@@ -7,7 +7,7 @@ services:
       - /var/log/alerts:/var/log 
     environment:
       - DB_HOST=127.0.0.1 
-      - LEARNING_MODE=False
+      - LEARNING_MODE=True
       - SNIFFER_INTERFACE=ens3
       - DB_PORT=5432
       - DB_NAME=sniffer_db
