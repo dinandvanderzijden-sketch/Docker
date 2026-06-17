@@ -53,10 +53,12 @@ services:
       SCHEDULE: '@every 1h' 
       BACKUP_KEEP_DAYS: 7 
       POSTGRES_EXTRA_OPTS: '-Z6' 
+      BACKUP_ON_START: 'TRUE'
     volumes:
-      - ./db_backups:/backup 
+      - ./db_backups:/backups
     depends_on:
-      - sniffer-db
+     sniffer-db:
+      condition: service_healthy
     networks:
       - sniffer_internal
     secrets:
