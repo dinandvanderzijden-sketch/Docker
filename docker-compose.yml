@@ -41,33 +41,40 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  db-backup:
-    image: prodrigestivill/postgres-backup-local:15-alpine
+db-backup:
+    image: jkaninda/pg-bkup:latest
     container_name: db_backup
+    
+    command: >
+      /bin/sh -c "
+      export DB_PASSWORD=$$(cat /run/secrets/db_password) &&
+      export GPG_PASSPHRASE=$$(cat /run/secrets/gpg_passphrase) &&
+      exec backup -d sniffer_db --cron-expression '@every 1h'
+      "
     environment:
-      POSTGRES_HOST: sniffer-db 
-      POSTGRES_DB: sniffer_db
-      POSTGRES_USER: sniffer_admin
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      SCHEDULE: '@every 1h' 
-      BACKUP_KEEP_DAYS: 7 
-      POSTGRES_EXTRA_OPTS: '-Z6' 
+      DB_HOST: sniffer-db
+      DB_PORT: 5432
+      DB_USERNAME: sniffer_admin
+      BACKUP_RETENTION_DAYS: 7
       BACKUP_ON_START: 'TRUE'
     volumes:
       - ./db_backups:/backups
     depends_on:
-     sniffer-db:
-      condition: service_healthy
+      sniffer-db:
+        condition: service_healthy
     networks:
       - sniffer_internal
     secrets:
       - db_password
+      - gpg_passphrase 
     restart: always
 
 secrets:
   db_password:
     file: ./db_password.txt
+  gpg_passphrase:
+    file: ./gpg_passphrase.txt 
+
     
 volumes:
   postgres_data: 

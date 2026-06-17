@@ -3,7 +3,7 @@ import sys
 import time
 from scapy.all import sniff, ARP, IP
 import psycopg2
-
+#Dit is gescreven meeste door LLM, ik heb zelf gevraagd om scapy te gebruiken
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")  
 DB_NAME = os.getenv("DB_NAME", "sniffer_db")
 DB_USER = os.getenv("DB_USER", "sniffer_admin")
