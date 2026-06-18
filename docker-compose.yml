@@ -74,6 +74,18 @@ services:
       - gpg_passphrase
     restart: always
 
+  portainer:
+    image: portainer/portainer-ce:2.21.3
+    container_name: portainer_local_dashboard
+    restart: always
+    ports:
+      - "9443:9443" 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - portainer_data:/data
+    networks:
+      - sniffer_internal
+
 secrets:
   db_password:
     file: ./db_password.txt
@@ -83,6 +95,7 @@ secrets:
     
 volumes:
   postgres_data: 
+  portainer_data:
 
 networks:
   sniffer_internal:
