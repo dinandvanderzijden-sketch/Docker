@@ -48,9 +48,15 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
+        # 1. Omgevingsvariabelen veilig laden vanuit Docker Secrets
         export DB_PASSWORD=$$(cat /run/secrets/db_password)
         export GPG_PASSPHRASE=$$(cat /run/secrets/gpg_passphrase)
-        exec pg-bkup backup -d sniffer_db --cron-expression '@every 1h'
+        
+        # 2. DIRECT een back-up maken bij het opstarten
+        pg-bkup backup -d sniffer_db
+        
+        # 3. De uursplanning activeren voor de toekomst
+        pg-bkup backup -d sniffer_db --cron-expression '@every 1h'
     environment:
       DB_HOST: sniffer-db
       DB_PORT: 5432
